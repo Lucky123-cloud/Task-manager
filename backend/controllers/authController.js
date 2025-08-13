@@ -65,31 +65,35 @@ const registerUser = async (req, res) => {
 //@route POST /api/auth/login
 //@access Public
 const loginUser = async (req, res) => {
-    const { email, password } = req.body;
-
     try {
+        const { email, password } = req.body;
+
         // Check if user exists
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(401).json({ message: "Invalid email or password" });
         }
-        // Check password
+
+        // Compare passwords
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(401).json({ message: "Invalid email or password" });
         }
-        // Generate JWT token
-        const token = generateToken(user._id);
+
+        // Return user data with JWT
         res.json({
             _id: user._id,
             name: user.name,
             email: user.email,
-            token,
+            role: user.role,
+            profileImageUrl: user.profileImageUrl,
+            token: generateToken(user._id)
         });
+
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: "Server Error", error: error.message });
     }
-}
+};
 
 //@desc Get user profile
 //@route GET /api/auth/profile
@@ -110,27 +114,33 @@ const getUserProfile = async (req, res) => {
 //@route PUT /api/auth/profile
 //@access Private (require jwt token)
 const updateUserProfile = async (req, res) => {
-    const { name, email, password } = req.body;
-
     try {
         const user = await User.findById(req.user.id);
+
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: "User not found" });
         }
-        // Update user fields
-        user.name = name || user.name;
-        user.email = email || user.email;
-        if (password) {
-            user.password = await bcrypt.hash(password, 10);
+
+        user.name = req.body.name || user.name;
+        user.email = req.body.email || user.email;
+
+        if (req.body.password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(req.body.passowrd, salt);
         }
-        await user.save();
-        res.json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+
+        res.json ({
+            _id: updateUser._id,
+            name: updateUser.name,
+            email: updateUser.email,
+            role: updateUser.role,
+            token: generateToken(updateUser._id)
+        })
+
+        const updateUser = await user.save();
+
+    } catch(error) {
+
     }
 }
 
