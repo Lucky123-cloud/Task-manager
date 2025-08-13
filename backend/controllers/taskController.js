@@ -24,7 +24,39 @@ const getTaskById = async (req, res) => {
 //@desc Create a new task (admin only)
 //@route POST /api/tasks/
 //@access Private (Admin)
-const createTask = async (req, res) => {};
+const createTask = async (req, res) => {
+    try {
+        const {
+            title,
+            description,
+            priority,
+            dueDate,
+            assignedTo,
+            attachments,
+            todoChecklist,
+        } = req.body
+
+        if (!Array.isArray(assignedTo)) {
+            return res
+                .status(400)
+                .json({ message: "assignedTo must be an array of user IOs "});
+        }
+
+        const task = await Task.create({
+            title,
+            description,
+            priority,
+            dueDate,
+            createdBy: req.user._id,
+            todoChecklist,
+            attachments,
+        });
+
+        res.status(201).json({ message: "Task created successfully", task})
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
 
 //@desc Update task details
 //@route POST /api/tasks/
