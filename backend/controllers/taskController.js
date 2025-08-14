@@ -52,7 +52,7 @@ const createTask = async (req, res) => {
             attachments,
         });
 
-        res.status(201).json({ message: "Task created successfully", task})
+        res.status(201).json({ message: "Task created successfully", task })
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
     }
@@ -61,12 +61,50 @@ const createTask = async (req, res) => {
 //@desc Update task details
 //@route POST /api/tasks/
 //@access Private
-const updateTask = async (req, res) => {};
+const updateTask = async (req, res) => {
+    try {
+        const task = await Task.findById(req.params.id);
+
+        if (!task) return res.status(404).json({ message: "Task not found" });
+
+        task.title = req.body.title || task.title;
+        task.description = req.body.description || task.description;
+        task.dueDate = req.body.dueDate || task.dueDate;
+        task.todoChecklist = req.body.todoChecklist || task.todoChecklist;
+        task.attachments = req.body.attachments || task.attachments;
+
+        if (req.body.assignedTo) {
+            if (!Array.isArray(req.body.assignedTo)) {
+                return res
+                    .status(400)
+                    .json({ message: "assignedTo must be and array of Users ID" })
+            }
+            task.assignedTo = req.body.assignedTo;
+        }
+
+        const updatedTask = await task.save();
+        res.json({ message: "Task updated successfully", updatedTask })
+
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
 
 //@desc Delete a task (Admin only)
 //@route DELETE /api/tasks/:id
 //@access Private (Admin)
-const deleteTask = async (req, res) => {};
+const deleteTask = async (req, res) => {
+    try {
+        const task = await Task.findById(req.params.id);
+
+        if (!task) return res.status(404).json({ message: "Task not found" });
+
+        await task.deleteOne();
+        res.json({ message: "Task deleted successfully" });
+    } catch(error) {
+        res.status(500).json({ message: "server error", error: error.message });
+    }
+};
 
 //@desc Update Task status
 //@route PUT /api/tasks/:id/todo
