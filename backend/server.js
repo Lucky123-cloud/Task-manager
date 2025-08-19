@@ -35,6 +35,11 @@ app.use("/api/reports", reportRoutes);
 // Serve uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// ✅ Root Route (fix for "Not Found")
+app.get("/", (req, res) => {
+  res.send("Task Manager API is running...");
+});
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
