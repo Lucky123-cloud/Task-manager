@@ -1,0 +1,158 @@
+TASK MANAGER APP - MONITORING GUIDE
+===================================
+
+This document explains how to monitor the Task Manager Node.js + Express application
+using two different approaches:
+
+1. Express Status Monitor (Real-time Web Dashboard)
+2. PM2 (Process Manager + Advanced Monitoring)
+
+Each section covers installation, configuration, and usage.
+
+===================================
+1. EXPRESS-STATUS-MONITOR
+===================================
+
+Overview:
+---------
+express-status-monitor provides a built-in middleware for Express.js applications.
+It gives a real-time dashboard at an endpoint (e.g., /status) showing:
+- CPU usage
+- Memory usage
+- Response times
+- Requests per second
+- Status codes
+- Load average
+
+Installation:
+-------------
+Run:
+    npm install express-status-monitor --save
+
+Setup:
+------
+In your server.js (or app.js):
+
+    const express = require('express');
+    const statusMonitor = require('express-status-monitor');
+    const app = express();
+
+    // Add before your routes
+    app.use(statusMonitor());
+
+    // Optional: custom route
+    app.get('/status', statusMonitor().pageRoute);
+
+    app.listen(3000, () => {
+        console.log('Task Manager running on http://localhost:3000');
+    });
+
+Usage:
+------
+1. Start your app:
+       node server.js
+
+2. Open in browser:
+       http://localhost:3000/status
+
+3. Observe real-time metrics:
+   - CPU % usage per core
+   - Heap memory usage
+   - Event loop lag
+   - Requests/sec
+   - Status code distribution
+
+Benefits:
+---------
+- Quick setup
+- Great for local or development monitoring
+- Real-time visualization
+
+Limitations:
+------------
+- Only works while the process is running
+- No historical data storage
+- Not ideal for production (use behind auth)
+
+===================================
+2. PM2 - PROCESS MANAGER
+===================================
+
+Overview:
+---------
+PM2 is an advanced process manager for Node.js apps.
+It provides:
+- Process management (start, stop, restart, reload)
+- CPU and Memory monitoring
+- Load balancing (cluster mode)
+- Log management
+- Web-based monitoring dashboard (pm2 monit / pm2 plus)
+
+Installation:
+-------------
+Install globally:
+    npm install -g pm2
+
+Start the app:
+    pm2 start server.js --name task-manager
+
+Monitor in terminal:
+    pm2 monit
+
+List processes:
+    pm2 list
+
+View logs:
+    pm2 logs task-manager
+
+CPU/Memory details:
+    pm2 show task-manager
+
+Advanced Monitoring (PM2 Plus / pm2.io):
+----------------------------------------
+1. Run:
+       pm2 plus
+
+2. Sign up or log in to pm2.io
+3. View advanced dashboard (CPU, memory, latency, logs, exceptions, alerts)
+
+Benefits:
+---------
+- Production-grade monitoring
+- Keeps apps alive (auto-restart)
+- Built-in load balancer
+- Centralized logs
+- Online dashboard for remote monitoring
+
+===================================
+3. COMBINED USAGE
+===================================
+
+- In development:
+    Use express-status-monitor for quick visual insights on /status.
+- In production:
+    Use PM2 for process management, logging, clustering, and remote monitoring.
+
+===================================
+4. QUICK COMMANDS REFERENCE
+===================================
+
+Express Status Monitor:
+-----------------------
+- Install:  npm install express-status-monitor
+- Add to server: app.use(require('express-status-monitor')());
+- Access:  http://localhost:3000/status
+
+PM2:
+----
+- Start app:   pm2 start server.js --name task-manager
+- Restart app: pm2 restart task-manager
+- Stop app:    pm2 stop task-manager
+- Delete app:  pm2 delete task-manager
+- Logs:        pm2 logs task-manager
+- Monitoring:  pm2 monit
+- Online dash: pm2 plus
+
+===================================
+END OF DOCUMENT
+===================================
